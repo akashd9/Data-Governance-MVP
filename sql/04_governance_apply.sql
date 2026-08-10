@@ -76,32 +76,52 @@ ALTER TABLE gold.fraud_alerts SET TAGS ('data_product' = 'fraud_alerts', 'sensit
 
 -- ============================================================================
 -- 5. Grants
+--
+--    NOTE: analysts / fraud_investigators / compliance_officers / data_engineers
+--    exist only as WORKSPACE-local groups in this account, not account-level
+--    identities -- Unity Catalog can only grant to account users, service
+--    principals, or account-level groups, so `GRANT ... TO `data_engineers``
+--    (etc.) fails with PRINCIPAL_DOES_NOT_EXIST. Deploying this required
+--    account-admin rights on the Databricks account (this login only has
+--    workspace-admin rights), so the group promotion could not be done here.
+--
+--    Until an account admin promotes those four groups to account level, all
+--    grants below target the single account user so the pipeline, masks, and
+--    row filter can be deployed and exercised end-to-end. The intended
+--    role-scoped grants are kept below, commented out, ready to swap in.
 -- ============================================================================
-GRANT USE CATALOG ON CATALOG datagovernancemvp TO `data_engineers`;
-GRANT USE CATALOG ON CATALOG datagovernancemvp TO `analysts`;
-GRANT USE CATALOG ON CATALOG datagovernancemvp TO `fraud_investigators`;
-GRANT USE CATALOG ON CATALOG datagovernancemvp TO `compliance_officers`;
+GRANT USE CATALOG ON CATALOG datagovernancemvp TO `akash.dolas@gmail.com`;
+GRANT ALL PRIVILEGES ON SCHEMA bronze     TO `akash.dolas@gmail.com`;
+GRANT ALL PRIVILEGES ON SCHEMA silver     TO `akash.dolas@gmail.com`;
+GRANT ALL PRIVILEGES ON SCHEMA gold       TO `akash.dolas@gmail.com`;
+GRANT ALL PRIVILEGES ON SCHEMA governance TO `akash.dolas@gmail.com`;
 
--- data_engineers: full build/ops access across all layers
-GRANT ALL PRIVILEGES ON SCHEMA bronze     TO `data_engineers`;
-GRANT ALL PRIVILEGES ON SCHEMA silver     TO `data_engineers`;
-GRANT ALL PRIVILEGES ON SCHEMA gold       TO `data_engineers`;
-GRANT ALL PRIVILEGES ON SCHEMA governance TO `data_engineers`;
-
--- compliance_officers: full read across silver + gold, unmasked (per mask functions above)
-GRANT USE SCHEMA ON SCHEMA silver TO `compliance_officers`;
-GRANT SELECT     ON SCHEMA silver TO `compliance_officers`;
-GRANT USE SCHEMA ON SCHEMA gold   TO `compliance_officers`;
-GRANT SELECT     ON SCHEMA gold   TO `compliance_officers`;
-GRANT USE SCHEMA ON SCHEMA governance TO `compliance_officers`;
-
--- analysts: masked, aggregate-level gold access only (no fraud_alerts, no silver PII tables)
-GRANT USE SCHEMA ON SCHEMA gold TO `analysts`;
-GRANT SELECT ON TABLE gold.customer_360               TO `analysts`;
-GRANT SELECT ON TABLE gold.monthly_transaction_summary TO `analysts`;
-
--- fraud_investigators: masked customer_360 (row-filtered) + full fraud_alerts detail
-GRANT USE SCHEMA ON SCHEMA gold TO `fraud_investigators`;
-GRANT SELECT ON TABLE gold.customer_360               TO `fraud_investigators`;
-GRANT SELECT ON TABLE gold.monthly_transaction_summary TO `fraud_investigators`;
-GRANT SELECT ON TABLE gold.fraud_alerts                TO `fraud_investigators`;
+-- -- Intended role-scoped grants (activate once the groups below are account-level):
+-- GRANT USE CATALOG ON CATALOG datagovernancemvp TO `data_engineers`;
+-- GRANT USE CATALOG ON CATALOG datagovernancemvp TO `analysts`;
+-- GRANT USE CATALOG ON CATALOG datagovernancemvp TO `fraud_investigators`;
+-- GRANT USE CATALOG ON CATALOG datagovernancemvp TO `compliance_officers`;
+--
+-- -- data_engineers: full build/ops access across all layers
+-- GRANT ALL PRIVILEGES ON SCHEMA bronze     TO `data_engineers`;
+-- GRANT ALL PRIVILEGES ON SCHEMA silver     TO `data_engineers`;
+-- GRANT ALL PRIVILEGES ON SCHEMA gold       TO `data_engineers`;
+-- GRANT ALL PRIVILEGES ON SCHEMA governance TO `data_engineers`;
+--
+-- -- compliance_officers: full read across silver + gold, unmasked (per mask functions above)
+-- GRANT USE SCHEMA ON SCHEMA silver TO `compliance_officers`;
+-- GRANT SELECT     ON SCHEMA silver TO `compliance_officers`;
+-- GRANT USE SCHEMA ON SCHEMA gold   TO `compliance_officers`;
+-- GRANT SELECT     ON SCHEMA gold   TO `compliance_officers`;
+-- GRANT USE SCHEMA ON SCHEMA governance TO `compliance_officers`;
+--
+-- -- analysts: masked, aggregate-level gold access only (no fraud_alerts, no silver PII tables)
+-- GRANT USE SCHEMA ON SCHEMA gold TO `analysts`;
+-- GRANT SELECT ON TABLE gold.customer_360               TO `analysts`;
+-- GRANT SELECT ON TABLE gold.monthly_transaction_summary TO `analysts`;
+--
+-- -- fraud_investigators: masked customer_360 (row-filtered) + full fraud_alerts detail
+-- GRANT USE SCHEMA ON SCHEMA gold TO `fraud_investigators`;
+-- GRANT SELECT ON TABLE gold.customer_360               TO `fraud_investigators`;
+-- GRANT SELECT ON TABLE gold.monthly_transaction_summary TO `fraud_investigators`;
+-- GRANT SELECT ON TABLE gold.fraud_alerts                TO `fraud_investigators`;

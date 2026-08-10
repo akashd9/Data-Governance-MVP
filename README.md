@@ -36,8 +36,16 @@ Run in order (also wired as a Databricks Job, see `/job`):
 
 ## Governance model
 
-Four Unity Catalog groups drive access (pre-existing in the workspace): `data_engineers`,
-`compliance_officers`, `analysts`, `fraud_investigators`.
+The design is role-scoped around four groups: `data_engineers`, `compliance_officers`,
+`analysts`, `fraud_investigators`. **Known environment gap:** these currently exist only as
+workspace-local groups in this Databricks account, not account-level identities — Unity Catalog
+can only grant privileges to account users, service principals, or account-level groups, so
+`GRANT ... TO \`data_engineers\`` fails with `PRINCIPAL_DOES_NOT_EXIST`. Promoting them requires
+account-admin rights on the Databricks account (this deployment only had workspace-admin rights).
+Until that's done, `04_governance_apply.sql` grants everything to the single account user
+(`akash.dolas@gmail.com`) so the pipeline, masks, and row filter still deploy and run end-to-end;
+the intended role-scoped grants are included commented-out, ready to swap in once an account admin
+promotes the groups.
 
 | Role | Silver | `gold.customer_360` | `gold.fraud_alerts` | PII visibility |
 |---|---|---|---|---|
