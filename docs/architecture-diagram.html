@@ -1,0 +1,495 @@
+<style>
+  :root {
+    --ink: #1c2430;
+    --paper: #eef1f6;
+    --surface: #ffffff;
+    --line: #70798a;
+    --line-soft: #c7ced9;
+    --accent-teal: #1f7a72;
+    --accent-gold: #9a6d1f;
+    --accent-flag: #a83f2b;
+    --ok: #3f7d52;
+    --bronze-tint: #efe6da;
+    --silver-tint: #e6eaf1;
+    --goldschema-tint: #f3ecd7;
+    --gate-fill: rgba(154, 109, 31, 0.12);
+    --role-tint: #eef0f5;
+    --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Code", "Roboto Mono", Consolas, "Liberation Mono", monospace;
+    --font-serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #e8ebf1;
+      --paper: #0f141c;
+      --surface: #161c26;
+      --line: #8c96a8;
+      --line-soft: #333d4c;
+      --accent-teal: #4fb3a6;
+      --accent-gold: #d9a24f;
+      --accent-flag: #e08a6f;
+      --ok: #6fbf82;
+      --bronze-tint: #2a2117;
+      --silver-tint: #1c2530;
+      --goldschema-tint: #2c2718;
+      --gate-fill: rgba(217, 162, 79, 0.16);
+      --role-tint: #1a1f2a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #e8ebf1;
+    --paper: #0f141c;
+    --surface: #161c26;
+    --line: #8c96a8;
+    --line-soft: #333d4c;
+    --accent-teal: #4fb3a6;
+    --accent-gold: #d9a24f;
+    --accent-flag: #e08a6f;
+    --ok: #6fbf82;
+    --bronze-tint: #2a2117;
+    --silver-tint: #1c2530;
+    --goldschema-tint: #2c2718;
+    --gate-fill: rgba(217, 162, 79, 0.16);
+    --role-tint: #1a1f2a;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-serif);
+    padding: clamp(20px, 4vw, 56px);
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+  }
+  a { color: var(--accent-teal); }
+  a:focus-visible, a:focus { outline: 2px solid var(--accent-teal); outline-offset: 2px; }
+
+  .page-head { max-width: 74ch; display: flex; flex-direction: column; gap: 10px; }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent-teal);
+    margin: 0;
+  }
+  h1 {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: clamp(22px, 3vw, 30px);
+    letter-spacing: -0.01em;
+    margin: 0;
+    text-wrap: balance;
+  }
+  .dek {
+    font-family: var(--font-serif);
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--ink);
+    margin: 0;
+    max-width: 62ch;
+  }
+  .dek code, .panel code, footer code {
+    font-family: var(--font-mono);
+    font-size: 0.92em;
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-radius: 4px;
+    padding: 0.05em 0.4em;
+  }
+
+  figure.diagram { margin: 0; display: flex; flex-direction: column; gap: 14px; }
+  .diagram-frame {
+    overflow-x: auto;
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-radius: 12px;
+    padding: 18px;
+  }
+  .diagram-frame svg { display: block; width: 100%; height: auto; min-width: 900px; color: var(--ink); }
+  figcaption {
+    font-family: var(--font-serif);
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--ink);
+    max-width: 76ch;
+  }
+
+  .panels {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+  }
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-radius: 12px;
+    padding: 22px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .panel h2 {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin: 0;
+    color: var(--ink);
+  }
+  table { border-collapse: collapse; width: 100%; font-family: var(--font-mono); font-size: 13px; }
+  table caption { display: none; }
+  thead th {
+    text-align: left;
+    font-weight: 600;
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--line);
+    border-bottom: 1px solid var(--line-soft);
+    padding: 0 8px 8px 0;
+  }
+  tbody td { padding: 7px 8px 7px 0; border-bottom: 1px dashed var(--line-soft); }
+  tbody tr:last-child td { border-bottom: none; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; padding-right: 16px; }
+  .status {
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 2px 7px;
+    border-radius: 999px;
+  }
+  .status--pass { color: var(--ok); background: color-mix(in srgb, var(--ok) 16%, transparent); }
+  .status--info { color: var(--accent-teal); background: color-mix(in srgb, var(--accent-teal) 14%, transparent); }
+
+  dl.legend { margin: 0; display: flex; flex-direction: column; gap: 12px; }
+  dl.legend > div { display: grid; grid-template-columns: 26px 1fr; gap: 10px; align-items: start; }
+  dl.legend .swatch { margin-top: 4px; }
+  dl.legend dt { font-family: var(--font-mono); font-size: 12.5px; font-weight: 700; }
+  dl.legend dd { margin: 2px 0 0; font-family: var(--font-serif); font-size: 13.5px; line-height: 1.5; color: var(--ink); }
+
+  footer.page-foot {
+    font-family: var(--font-serif);
+    font-size: 13px;
+    color: var(--line);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    figure.diagram { animation: rise 420ms ease-out; }
+  }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+</style>
+
+<header class="page-head">
+  <p class="eyebrow">Databricks &middot; Unity Catalog</p>
+  <h1>Data Governance MVP &mdash; Architecture</h1>
+  <p class="dek">
+    How synthetic banking data moves from raw ingestion to a governed, role-aware gold layer
+    inside the <code>datagovernancemvp</code> catalog &mdash; and where the deployment's real
+    governance gap sits.
+  </p>
+</header>
+
+<figure class="diagram">
+  <div class="diagram-frame">
+    <svg viewBox="0 0 1500 600" role="img" aria-label="Data flow diagram. A Databricks Job runs seven notebooks in sequence: setup schemas, bronze ingest, silver transform, gold aggregate, governance apply, data quality checks, and audit lineage. Synthetic data flows from a SQL generator into bronze landing tables, is conformed into silver tables with primary key, foreign key and check constraints, then aggregated into three gold tables. Gold output passes through a governance gate that applies column masks, a row filter, and PII tags, all currently active. The gate's designed grants to four roles, data engineers, compliance officers, analysts, and fraud investigators, are blocked because those groups are workspace-local rather than account-level identities, shown as dashed red arrows and red dashed boxes. Access is instead granted, shown as a solid gold arrow, to a single interim account user with full privileges.">
+      <defs>
+        <marker id="arrowTeal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 Z" fill="var(--accent-teal)"/>
+        </marker>
+        <marker id="arrowGold" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 Z" fill="var(--accent-gold)"/>
+        </marker>
+        <marker id="arrowBlocked" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          <path d="M1,1 L9,5 L1,9" fill="none" stroke="var(--accent-flag)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+      </defs>
+
+      <style>
+        .lbl-rail{font:600 10px var(--font-mono);letter-spacing:.06em;fill:var(--line);text-transform:uppercase;}
+        .chip{fill:var(--surface);stroke:var(--line-soft);stroke-width:1.1;}
+        .chip-num{font:700 15px var(--font-mono);fill:var(--ink);text-anchor:middle;}
+        .chip-name{font:500 9px var(--font-mono);fill:var(--line);text-anchor:middle;}
+        .rail-flow{stroke:var(--accent-teal);stroke-width:1.5;fill:none;marker-end:url(#arrowTeal);}
+        .container{fill:none;stroke:var(--line-soft);stroke-width:1;stroke-dasharray:2 4;}
+        .uc-label{font:700 11px var(--font-mono);letter-spacing:.05em;fill:var(--ink);text-transform:uppercase;}
+        .col-hdr{font:700 11px var(--font-mono);letter-spacing:.08em;fill:var(--line);text-transform:uppercase;text-anchor:middle;}
+        .col-hdr-sm{font:500 9.5px var(--font-mono);fill:var(--line);text-anchor:middle;}
+        .node{stroke-width:1.1;}
+        .node--source{fill:var(--surface);stroke:var(--line);stroke-dasharray:3 3;}
+        .node--bronze{fill:var(--bronze-tint);stroke:var(--line-soft);}
+        .node--silver{fill:var(--silver-tint);stroke:var(--line-soft);}
+        .node--gold{fill:var(--goldschema-tint);stroke:var(--line-soft);}
+        .node-title{font:700 13px var(--font-mono);fill:var(--ink);}
+        .node-detail{font:400 10.5px var(--font-mono);fill:var(--line);}
+        .node-detail-flag{font:600 10.5px var(--font-mono);fill:var(--accent-flag);}
+        .flow{stroke:var(--accent-teal);stroke-width:1.6;fill:none;}
+        .flow-noarrow{stroke:var(--line);stroke-width:1.3;fill:none;}
+        .bus{stroke:var(--line);stroke-width:1.3;fill:none;}
+        .dot{fill:var(--line);}
+        .dot-teal{fill:var(--accent-teal);}
+        .dot-gold{fill:var(--accent-gold);}
+        .dot-flag{fill:var(--accent-flag);}
+        .caption-sm{font:400 10.5px var(--font-mono);fill:var(--line);text-anchor:middle;}
+        .gate-band{fill:var(--gate-fill);stroke:var(--accent-gold);stroke-width:1.4;}
+        .gate-title{font:700 11px var(--font-mono);letter-spacing:.05em;fill:var(--ink);text-transform:uppercase;text-anchor:middle;}
+        .gate-chip{fill:var(--surface);stroke:var(--accent-gold);stroke-width:1;}
+        .gate-chip-text{font:600 10.5px var(--font-mono);fill:var(--ink);text-anchor:middle;}
+        .lock{fill:none;stroke:var(--accent-gold);stroke-width:1.6;stroke-linecap:round;}
+        .node--role{fill:var(--role-tint);stroke:var(--accent-flag);stroke-width:1.2;stroke-dasharray:4 3;}
+        .node--interim{fill:var(--role-tint);stroke:var(--accent-gold);stroke-width:1.7;}
+        .role-title{font:700 13px var(--font-mono);fill:var(--ink);}
+        .role-detail{font:400 10.5px var(--font-mono);fill:var(--line);}
+        .role-blocked{font:600 10px var(--font-mono);fill:var(--accent-flag);}
+        .role-active{font:600 10px var(--font-mono);fill:var(--accent-gold);}
+        .flow-blocked{stroke:var(--accent-flag);stroke-width:1.4;fill:none;stroke-dasharray:5 4;marker-end:url(#arrowBlocked);}
+        .flow-gold{stroke:var(--accent-gold);stroke-width:1.9;fill:none;marker-end:url(#arrowGold);}
+      </style>
+
+      <!-- Orchestration rail -->
+      <text class="lbl-rail" x="20" y="14">Databricks Job &middot; datagovernancemvp_pipeline &middot; serverless &middot; sequential tasks</text>
+
+      <rect class="chip" x="20" y="28" width="182" height="50" rx="6"/>
+      <text class="chip-num" x="111" y="50">00</text>
+      <text class="chip-name" x="111" y="66">setup_schemas</text>
+
+      <rect class="chip" x="233" y="28" width="182" height="50" rx="6"/>
+      <text class="chip-num" x="324" y="50">01</text>
+      <text class="chip-name" x="324" y="66">bronze_ingest</text>
+
+      <rect class="chip" x="446" y="28" width="182" height="50" rx="6"/>
+      <text class="chip-num" x="537" y="50">02</text>
+      <text class="chip-name" x="537" y="66">silver_transform</text>
+
+      <rect class="chip" x="659" y="28" width="182" height="50" rx="6"/>
+      <text class="chip-num" x="750" y="50">03</text>
+      <text class="chip-name" x="750" y="66">gold_aggregate</text>
+
+      <rect class="chip" x="872" y="28" width="182" height="50" rx="6"/>
+      <text class="chip-num" x="963" y="50">04</text>
+      <text class="chip-name" x="963" y="66">governance_apply</text>
+
+      <rect class="chip" x="1085" y="28" width="182" height="50" rx="6"/>
+      <text class="chip-num" x="1176" y="50">05</text>
+      <text class="chip-name" x="1176" y="66">dq_checks</text>
+
+      <rect class="chip" x="1298" y="28" width="182" height="50" rx="6"/>
+      <text class="chip-num" x="1389" y="50">06</text>
+      <text class="chip-name" x="1389" y="66">audit_lineage</text>
+
+      <line class="rail-flow" x1="202" y1="53" x2="233" y2="53"/>
+      <line class="rail-flow" x1="415" y1="53" x2="446" y2="53"/>
+      <line class="rail-flow" x1="628" y1="53" x2="659" y2="53"/>
+      <line class="rail-flow" x1="841" y1="53" x2="872" y2="53"/>
+      <line class="rail-flow" x1="1054" y1="53" x2="1085" y2="53"/>
+      <line class="rail-flow" x1="1267" y1="53" x2="1298" y2="53"/>
+
+      <!-- Unity Catalog container -->
+      <rect class="container" x="8" y="104" width="1180" height="356" rx="10"/>
+      <text class="uc-label" x="20" y="126">Unity Catalog &middot; datagovernancemvp</text>
+
+      <!-- Column headers -->
+      <text class="col-hdr" x="315" y="150">Bronze</text>
+      <text class="col-hdr" x="595" y="150">Silver</text>
+      <text class="col-hdr" x="875" y="150">Gold</text>
+      <text class="col-hdr" x="1100" y="150">Governance</text>
+      <text class="col-hdr" x="1340" y="150">Roles</text>
+      <text class="col-hdr-sm" x="1340" y="164">designed &middot; currently blocked</text>
+
+      <!-- Source generator -->
+      <text class="caption-sm" x="105" y="248">synthetic &middot; SQL generation</text>
+      <rect class="node node--source" x="20" y="257" width="140" height="70" rx="6"/>
+      <text class="node-title" x="32" y="275">synthetic_gen</text>
+      <text class="node-detail" x="32" y="291">pure SQL</text>
+      <text class="node-detail" x="32" y="305">no ext. system</text>
+      <circle class="dot dot-teal" cx="160" cy="292" r="3"/>
+
+      <!-- Bronze nodes -->
+      <rect class="node node--bronze" x="190" y="172" width="250" height="64" rx="6"/>
+      <text class="node-title" x="202" y="190">customers_raw</text>
+      <text class="node-detail" x="202" y="206">raw landing</text>
+      <text class="node-detail" x="202" y="220">2,000 rows</text>
+
+      <rect class="node node--bronze" x="190" y="260" width="250" height="64" rx="6"/>
+      <text class="node-title" x="202" y="278">accounts_raw</text>
+      <text class="node-detail" x="202" y="294">raw landing</text>
+      <text class="node-detail" x="202" y="308">3,500 rows</text>
+
+      <rect class="node node--bronze" x="190" y="348" width="250" height="64" rx="6"/>
+      <text class="node-title" x="202" y="366">transactions_raw</text>
+      <text class="node-detail" x="202" y="382">raw landing</text>
+      <text class="node-detail" x="202" y="396">80,000 rows</text>
+
+      <!-- Silver nodes -->
+      <rect class="node node--silver" x="470" y="172" width="250" height="64" rx="6"/>
+      <text class="node-title" x="482" y="190">customers</text>
+      <text class="node-detail" x="482" y="206">PK customer_id</text>
+      <text class="node-detail" x="482" y="220">CHECK dob &lt; today</text>
+
+      <rect class="node node--silver" x="470" y="260" width="250" height="64" rx="6"/>
+      <text class="node-title" x="482" y="278">accounts</text>
+      <text class="node-detail" x="482" y="294">PK/FK customer_id</text>
+      <text class="node-detail" x="482" y="308">CHECK status enum</text>
+
+      <rect class="node node--silver" x="470" y="348" width="250" height="64" rx="6"/>
+      <text class="node-title" x="482" y="366">transactions</text>
+      <text class="node-detail" x="482" y="382">PK/FK account_id</text>
+      <text class="node-detail" x="482" y="396">CHECK amount&gt;0 &middot; flags</text>
+
+      <!-- Gold nodes -->
+      <rect class="node node--gold" x="750" y="172" width="250" height="64" rx="6"/>
+      <text class="node-title" x="762" y="190">customer_360</text>
+      <text class="node-detail" x="762" y="206">PII: ssn &middot; email &middot; phone</text>
+      <text class="node-detail" x="762" y="220">masked + row-filtered</text>
+
+      <rect class="node node--gold" x="750" y="260" width="250" height="64" rx="6"/>
+      <text class="node-title" x="762" y="278">monthly_txn_summary</text>
+      <text class="node-detail" x="762" y="294">account &times; month</text>
+      <text class="node-detail" x="762" y="308">no PII</text>
+
+      <rect class="node node--gold" x="750" y="348" width="250" height="64" rx="6"/>
+      <text class="node-title" x="762" y="366">fraud_alerts</text>
+      <text class="node-detail-flag" x="762" y="382">378 / 80,000 flagged</text>
+      <text class="node-detail" x="762" y="396">restricted access</text>
+
+      <!-- bronze -> silver -->
+      <line class="flow" x1="440" y1="204" x2="470" y2="204" marker-end="url(#arrowTeal)"/>
+      <line class="flow" x1="440" y1="292" x2="470" y2="292" marker-end="url(#arrowTeal)"/>
+      <line class="flow" x1="440" y1="380" x2="470" y2="380" marker-end="url(#arrowTeal)"/>
+      <text class="caption-sm" x="455" y="436">dedupe &middot; type &middot; constrain</text>
+
+      <!-- silver -> bus -> gold -->
+      <line class="flow-noarrow" x1="720" y1="204" x2="735" y2="204"/>
+      <line class="flow-noarrow" x1="720" y1="292" x2="735" y2="292"/>
+      <line class="flow-noarrow" x1="720" y1="380" x2="735" y2="380"/>
+      <line class="bus" x1="735" y1="204" x2="735" y2="380"/>
+      <circle class="dot" cx="735" cy="204" r="3"/>
+      <circle class="dot" cx="735" cy="292" r="3"/>
+      <circle class="dot" cx="735" cy="380" r="3"/>
+      <line class="flow" x1="735" y1="204" x2="750" y2="204" marker-end="url(#arrowTeal)"/>
+      <line class="flow" x1="735" y1="292" x2="750" y2="292" marker-end="url(#arrowTeal)"/>
+      <line class="flow" x1="735" y1="380" x2="750" y2="380" marker-end="url(#arrowTeal)"/>
+      <text class="caption-sm" x="735" y="436">join + aggregate</text>
+
+      <!-- gold -> gate -->
+      <line class="flow" x1="1000" y1="204" x2="1030" y2="204" marker-end="url(#arrowTeal)"/>
+      <line class="flow" x1="1000" y1="292" x2="1030" y2="292" marker-end="url(#arrowTeal)"/>
+      <line class="flow" x1="1000" y1="380" x2="1030" y2="380" marker-end="url(#arrowTeal)"/>
+
+      <!-- Governance gate -->
+      <rect class="gate-band" x="1030" y="160" width="140" height="260" rx="8"/>
+      <rect class="lock" x="1093" y="168" width="14" height="10" rx="1.5"/>
+      <path class="lock" d="M1096,168 V163 A4,4 0 0 1 1104,163 V168"/>
+      <text class="gate-title" x="1100" y="196">Governance gate</text>
+
+      <rect class="gate-chip" x="1040" y="210" width="120" height="30" rx="5"/>
+      <text class="gate-chip-text" x="1100" y="229">mask_ssn()</text>
+      <rect class="gate-chip" x="1040" y="248" width="120" height="30" rx="5"/>
+      <text class="gate-chip-text" x="1100" y="267">mask_email()</text>
+      <rect class="gate-chip" x="1040" y="286" width="120" height="30" rx="5"/>
+      <text class="gate-chip-text" x="1100" y="305">mask_phone()</text>
+      <rect class="gate-chip" x="1040" y="324" width="120" height="30" rx="5"/>
+      <text class="gate-chip-text" x="1100" y="343">row_filter()</text>
+      <rect class="gate-chip" x="1040" y="362" width="120" height="30" rx="5"/>
+      <text class="gate-chip-text" x="1100" y="381">pii tags</text>
+
+      <text class="caption-sm" x="1100" y="436">applied per query &middot; active now</text>
+
+      <!-- gate -> roles (blocked) -->
+      <circle class="dot dot-flag" cx="1170" cy="290" r="3"/>
+      <line class="flow-blocked" x1="1170" y1="290" x2="1210" y2="204"/>
+      <line class="flow-blocked" x1="1170" y1="290" x2="1210" y2="292"/>
+      <line class="flow-blocked" x1="1170" y1="290" x2="1210" y2="380"/>
+      <line class="flow-blocked" x1="1170" y1="290" x2="1210" y2="468"/>
+
+      <!-- gate -> interim (active) -->
+      <circle class="dot dot-gold" cx="1100" cy="420" r="3"/>
+      <path class="flow-gold" d="M1100,420 C1100,470 1340,468 1340,520"/>
+
+      <!-- Role nodes (designed, blocked) -->
+      <rect class="node node--role" x="1210" y="172" width="260" height="64" rx="6"/>
+      <text class="role-title" x="1222" y="190">data_engineers</text>
+      <text class="role-detail" x="1222" y="206">designed: full access</text>
+      <text class="role-blocked" x="1222" y="220">blocked &middot; workspace group</text>
+
+      <rect class="node node--role" x="1210" y="260" width="260" height="64" rx="6"/>
+      <text class="role-title" x="1222" y="278">compliance_officers</text>
+      <text class="role-detail" x="1222" y="294">designed: unmasked, all rows</text>
+      <text class="role-blocked" x="1222" y="308">blocked &middot; workspace group</text>
+
+      <rect class="node node--role" x="1210" y="348" width="260" height="64" rx="6"/>
+      <text class="role-title" x="1222" y="366">analysts</text>
+      <text class="role-detail" x="1222" y="382">designed: masked, all rows</text>
+      <text class="role-blocked" x="1222" y="396">blocked &middot; workspace group</text>
+
+      <rect class="node node--role" x="1210" y="436" width="260" height="64" rx="6"/>
+      <text class="role-title" x="1222" y="454">fraud_investigators</text>
+      <text class="role-detail" x="1222" y="470">designed: masked, flagged only</text>
+      <text class="role-blocked" x="1222" y="484">blocked &middot; workspace group</text>
+
+      <!-- Interim active grant -->
+      <rect class="node node--interim" x="1210" y="520" width="260" height="56" rx="6"/>
+      <text class="role-title" x="1222" y="538">akash.dolas@gmail.com</text>
+      <text class="role-detail" x="1222" y="554">account user &middot; interim grant</text>
+      <text class="role-active" x="1222" y="568">ALL PRIVILEGES &middot; active</text>
+    </svg>
+  </div>
+  <figcaption>
+    Synthetic data flows bronze &rarr; silver &rarr; gold, then through a governance gate that
+    masks PII, applies a row filter, and tags columns &mdash; all of which are deployed and active.
+    The gate's grants to the four <em>designed</em> roles are blocked (dashed red) because those
+    groups are workspace-local identities, not account-level ones, so Unity Catalog rejects
+    <code>GRANT ... TO</code> them. Full access is temporarily granted instead to a single
+    interim account user (solid gold), pending an account admin promoting the groups.
+  </figcaption>
+</figure>
+
+<section class="panels">
+  <div class="panel">
+    <h2>Data quality &mdash; governance.dq_results</h2>
+    <table>
+      <thead><tr><th>Check</th><th></th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>customers_row_count</td><td class="num">2,000</td><td><span class="status status--pass">PASS</span></td></tr>
+        <tr><td>accounts_row_count</td><td class="num">3,500</td><td><span class="status status--pass">PASS</span></td></tr>
+        <tr><td>transactions_row_count</td><td class="num">80,000</td><td><span class="status status--pass">PASS</span></td></tr>
+        <tr><td>orphan_transactions_missing_account</td><td class="num">0</td><td><span class="status status--pass">PASS</span></td></tr>
+        <tr><td>non_positive_amount_transactions</td><td class="num">0</td><td><span class="status status--pass">PASS</span></td></tr>
+        <tr><td>flagged_transaction_pct</td><td class="num">0.47%</td><td><span class="status status--info">INFO</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="panel">
+    <h2>How to read this diagram</h2>
+    <dl class="legend">
+      <div>
+        <svg class="swatch" width="26" height="14" viewBox="0 0 26 14" aria-hidden="true"><line x1="1" y1="7" x2="21" y2="7" stroke="var(--accent-teal)" stroke-width="2"/><path d="M17,3 L23,7 L17,11 Z" fill="var(--accent-teal)"/></svg>
+        <dt>Solid teal</dt>
+        <dd>Data in motion &mdash; bronze &rarr; silver &rarr; gold transformation.</dd>
+      </div>
+      <div>
+        <svg class="swatch" width="26" height="14" viewBox="0 0 26 14" aria-hidden="true"><line x1="1" y1="7" x2="21" y2="7" stroke="var(--accent-gold)" stroke-width="2.2"/><path d="M17,3 L23,7 L17,11 Z" fill="var(--accent-gold)"/></svg>
+        <dt>Solid gold</dt>
+        <dd>The governance mechanism actually in effect right now: masks, row filter, tags, and the one active grant.</dd>
+      </div>
+      <div>
+        <svg class="swatch" width="26" height="14" viewBox="0 0 26 14" aria-hidden="true"><line x1="1" y1="7" x2="21" y2="7" stroke="var(--accent-flag)" stroke-width="1.8" stroke-dasharray="4 3"/></svg>
+        <dt>Dashed red</dt>
+        <dd>Designed but blocked &mdash; <code>PRINCIPAL_DOES_NOT_EXIST</code> because the role groups aren't account-level identities yet.</dd>
+      </div>
+      <div>
+        <svg class="swatch" width="26" height="14" viewBox="0 0 26 14" aria-hidden="true"><rect x="1" y="2" width="24" height="10" rx="2" fill="none" stroke="var(--line)" stroke-width="1.4" stroke-dasharray="3 3"/></svg>
+        <dt>Dashed border</dt>
+        <dd>The synthetic generator &mdash; stands in for a real source system, not part of Unity Catalog.</dd>
+      </div>
+    </dl>
+  </div>
+</section>
+
+<footer class="page-foot">
+  Full pipeline source: <a href="https://github.com/akashd9/Data-Governance-MVP">github.com/akashd9/Data-Governance-MVP</a>
+</footer>

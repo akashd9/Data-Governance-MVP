@@ -63,15 +63,57 @@ an account admin promotes the groups (see **Governance model** below).
 
 ## Architecture
 
-```
-bronze (raw, synthetic)      silver (conformed, constrained)     gold (curated)
-─────────────────────        ──────────────────────────          ──────────────────────
-customers_raw          ──▶   customers (PK, CHECK dob)     ──▶   customer_360 (masked PII,
-accounts_raw            ──▶   accounts (PK/FK, CHECK status) ──▶   row-filtered for fraud team)
-transactions_raw        ──▶   transactions (PK/FK,           ──▶   monthly_transaction_summary
-                               CHECK amount>0, fraud flags)  ──▶   fraud_alerts (fraud/compliance only)
+A full interactive version (with a data-quality snapshot and a legend) lives at
+[`docs/architecture-diagram.html`](docs/architecture-diagram.html) — open it in a browser. Quick
+view:
 
-governance schema: mask_ssn / mask_email / mask_phone, customer_360_row_filter, dq_results
+```mermaid
+flowchart LR
+    SRC[["synthetic_gen<br/>pure SQL, no external source"]]
+
+    subgraph UC["Unity Catalog · datagovernancemvp"]
+        direction LR
+        subgraph BRONZE["bronze"]
+            B1["customers_raw<br/>2,000 rows"]
+            B2["accounts_raw<br/>3,500 rows"]
+            B3["transactions_raw<br/>80,000 rows"]
+        end
+        subgraph SILVER["silver — PK / FK / CHECK"]
+            S1[customers]
+            S2[accounts]
+            S3["transactions<br/>fraud flags"]
+        end
+        subgraph GOLD["gold"]
+            G1["customer_360<br/>PII"]
+            G2[monthly_txn_summary]
+            G3["fraud_alerts<br/>378 flagged"]
+        end
+        subgraph GATE["governance gate — active now"]
+            MASK["mask_ssn / mask_email / mask_phone"]
+            RF[customer_360_row_filter]
+            TAGS["pii_category / sensitivity tags"]
+        end
+    end
+
+    subgraph ROLES["designed roles — blocked: PRINCIPAL_DOES_NOT_EXIST"]
+        R1[data_engineers]
+        R2[compliance_officers]
+        R3[analysts]
+        R4[fraud_investigators]
+    end
+
+    ACTIVE[["akash.dolas@gmail.com<br/>interim · ALL PRIVILEGES · active"]]
+
+    SRC --> B1 & B2 & B3
+    B1 --> S1
+    B2 --> S2
+    B3 --> S3
+    S1 & S2 & S3 --> G1
+    S2 & S3 --> G2
+    S1 & S2 & S3 --> G3
+    G1 & G2 & G3 --> GATE
+    GATE -.blocked.-> R1 & R2 & R3 & R4
+    GATE ==active==> ACTIVE
 ```
 
 Data is synthetically generated in pure SQL (`01_bronze_ingest.sql`) so the project runs standalone
